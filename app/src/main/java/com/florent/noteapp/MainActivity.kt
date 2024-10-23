@@ -57,6 +57,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// Data class representing a note
 data class Note(
     val id: Int,
     var title: String,
@@ -67,12 +68,14 @@ data class Note(
 @Composable
 fun NoteApp() {
     val navController = rememberNavController()
-    val notes = remember { mutableStateListOf<Note>() }
+    val notes = remember { mutableStateListOf<Note>() } // List to store notes
 
-    // Set up a NavHost with two screens: Home and AddNote
+    // Set up a NavHost to navigate between screens
     NavHost(navController = navController, startDestination = "home") {
         composable("home") { HomeScreen(navController, notes) }  // Home screen
         composable("addNote") { AddNoteScreen(navController, notes) } // Add note screen
+
+        // Show note Screen
         composable("showNote/{noteId}") { backStackEntry ->
             val noteId = backStackEntry.arguments?.getString("noteId")?.toInt()
             val note = notes.find { it.id == noteId }
@@ -81,6 +84,7 @@ fun NoteApp() {
             }
 
         }
+        // Edit note Screen
         composable("editNote/{noteId}") { backStackEntry ->
             val noteId = backStackEntry.arguments?.getString("noteId")?.toInt()
             val note = notes.find { it.id == noteId }
@@ -105,7 +109,7 @@ fun HomeScreen(navController: NavHostController, notes: List<Note>) {
                         .padding(8.dp)
                         .clickable {
                             // Navigate to the note detail screen with the selected note
-                            navController.navigate("showNote/${note.id}")
+                            navController.navigate("showNote/${note.id}") // Shows clicked noted based on note ID
                         }
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -126,13 +130,11 @@ fun HomeScreen(navController: NavHostController, notes: List<Note>) {
         }
 
 
-
-
-        // FloatingActionButton at the bottom left
+        // Add note button at the bottom right
         FAB(
             modifier = Modifier
                 .padding(16.dp) // General padding
-                .offset(x = -12.dp, y = -12.dp) // Offset to move the button up and to the right
+                .offset(x = -12.dp, y = -45.dp) // Offset to move the button up and to the right
                 .align(Alignment.BottomEnd),
             onClick = { navController.navigate("addNote") },
             icon = Icons.Filled.Add
@@ -144,7 +146,7 @@ fun HomeScreen(navController: NavHostController, notes: List<Note>) {
 fun EditNoteScreen(navController: NavHostController, note: Note) {
     var noteTitle by remember { mutableStateOf(note.title) } // State for note title
     var noteContent by remember { mutableStateOf(note.content) } // State for note content
-    var errorMessage by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") } // Error message state
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize() .padding(top = 24.dp)) {
@@ -153,7 +155,7 @@ fun EditNoteScreen(navController: NavHostController, note: Note) {
                 value = noteTitle,
                 onValueChange = { noteTitle = it },
                 label = { Text("Title") },
-                isError = (noteTitle.length < 5 || noteTitle.length > 50 ) && errorMessage.isNotEmpty(),
+                isError = (noteTitle.length < 5 || noteTitle.length > 50 ) && errorMessage.isNotEmpty(), // To make the field red if there is an error
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
@@ -172,6 +174,7 @@ fun EditNoteScreen(navController: NavHostController, note: Note) {
                     .fillMaxWidth()
             )
 
+            // Shows error message when errorMessage contains an error.
             Text(
                 text = errorMessage,
                 color = MaterialTheme.colorScheme.error,
@@ -180,7 +183,6 @@ fun EditNoteScreen(navController: NavHostController, note: Note) {
 
             // Save button
             Button(
-
                 onClick = {
                     if (noteTitle.length < 3) {
                         errorMessage = "Title must be at least 3 characters"
@@ -213,7 +215,7 @@ fun EditNoteScreen(navController: NavHostController, note: Note) {
         FAB(
             modifier = Modifier
                 .padding(16.dp) // General padding
-                .offset(x = 12.dp, y = -12.dp) // Offset to move the button up and to the right
+                .offset(x = 12.dp, y = -45.dp) // Offset to move the button up and to the right
                 .align(Alignment.BottomStart),
             onClick = { navController.navigate("home") },
             icon = Icons.Filled.ArrowBackIosNew
@@ -260,7 +262,7 @@ fun ShowNoteScreen(navController: NavHostController, note: Note) {
                     // Update the note content
                     note.content = noteContent
                     note.title = noteTitle
-                    navController.navigate("editNote/${note.id}")
+                    navController.navigate("editNote/${note.id}") // Navigates to edit screen based on the note ID
 
                 },
                 modifier = Modifier
@@ -278,7 +280,7 @@ fun ShowNoteScreen(navController: NavHostController, note: Note) {
         FAB(
             modifier = Modifier
                 .padding(16.dp) // General padding
-                .offset(x = 12.dp, y = -12.dp) // Offset to move the button up and to the right
+                .offset(x = 12.dp, y = -45.dp) // Offset to move the button up and to the right
                 .align(Alignment.BottomStart),
             onClick = { navController.navigate("home") },
             icon = Icons.Filled.ArrowBackIosNew
@@ -360,7 +362,7 @@ fun AddNoteScreen(navController: NavHostController, notes: MutableList<Note>) {
         FAB(
             modifier = Modifier
                 .padding(16.dp) // General padding
-                .offset(x = 12.dp, y = -12.dp) // Offset to move the button up and to the right
+                .offset(x = 12.dp, y = -45.dp) // Offset to move the button up and to the right
                 .align(Alignment.BottomStart),
             onClick = { navController.navigate("home") },
             icon = Icons.Filled.ArrowBackIosNew
@@ -369,7 +371,7 @@ fun AddNoteScreen(navController: NavHostController, notes: MutableList<Note>) {
 }
 
 
-
+// Floating action button
 @Composable
 fun FAB(
     modifier: Modifier = Modifier,
