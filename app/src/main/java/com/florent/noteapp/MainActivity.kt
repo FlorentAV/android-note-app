@@ -71,7 +71,7 @@ fun NoteApp() {
     // Set up a NavHost to navigate between screens
     NavHost(navController = navController, startDestination = "home") {
         composable("home") { HomeScreen(navController, notes, onDelete) }  // Home screen
-        composable("addNote") { AddNoteScreen(navController, notes ) } // Add note screen
+        composable("addNote") { AddNoteScreen(navController, notes) } // Add note screen
 
         // Show note Screen
         composable("showNote/{noteId}") { backStackEntry ->
@@ -95,7 +95,6 @@ fun NoteApp() {
 }
 
 
-
 @Composable
 fun HomeScreen(navController: NavHostController, notes: List<Note>, onDelete: (Note) -> Unit) {
     Box(modifier = Modifier.fillMaxSize()) { // Use Box to allow for alignment
@@ -108,7 +107,7 @@ fun HomeScreen(navController: NavHostController, notes: List<Note>, onDelete: (N
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF6200EE),
 
-                ),
+                    ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 45.dp)
@@ -119,8 +118,8 @@ fun HomeScreen(navController: NavHostController, notes: List<Note>, onDelete: (N
             // LazyColumn to display notes
             LazyColumn(
                 modifier = Modifier
-                    .padding(top = 8.dp) // Padding between title and LazyColumn
-                    .fillMaxWidth() // Fill available width
+                    .padding(top = 8.dp)
+                    .fillMaxWidth()
             ) {
                 items(notes) { note ->
                     Card(
@@ -138,7 +137,7 @@ fun HomeScreen(navController: NavHostController, notes: List<Note>, onDelete: (N
                                 .padding(16.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Column { // Wrap Text elements in a Column
+                            Column( modifier = Modifier.weight(1f) ) { // Wrap Text elements in a Column
                                 Text(
                                     text = note.title,
                                     style = MaterialTheme.typography.titleMedium
@@ -149,7 +148,9 @@ fun HomeScreen(navController: NavHostController, notes: List<Note>, onDelete: (N
                                 )
                             }
 
-                            IconButton(onClick = { onDelete(note) }) {
+                            IconButton(onClick = { onDelete(note) },
+                                modifier = Modifier.align(Alignment.Top)
+                            ){
                                 Icon(Icons.Filled.Delete, contentDescription = "Delete note")
                             }
                         }
@@ -180,18 +181,21 @@ fun EditNoteScreen(navController: NavHostController, note: Note) {
     var errorMessage by remember { mutableStateOf("") } // Error message state
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize() .padding(top = 24.dp)) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 24.dp)) {
             // Text field for adding title
             TextField(
                 value = noteTitle,
                 onValueChange = { noteTitle = it },
                 label = { Text("Title") },
-                isError = (noteTitle.length < 5 || noteTitle.length > 50 ) && errorMessage.isNotEmpty(), // To make the field red if there is an error
+                isError = (noteTitle.length < 5 || noteTitle.length > 50) && errorMessage.isNotEmpty(), // To make the field red if there is an error
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
-            )
 
+
+            )
 
 
             // Text field for adding content
@@ -199,10 +203,11 @@ fun EditNoteScreen(navController: NavHostController, note: Note) {
                 value = noteContent,
                 onValueChange = { noteContent = it },
                 label = { Text("Add Note") },
-                isError = (noteContent.isEmpty() || noteContent.length > 120 ) && errorMessage.isNotEmpty(),
+                isError = (noteContent.isEmpty() || noteContent.length > 120) && errorMessage.isNotEmpty(),
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
+                    .height(200.dp)
             )
 
             // Shows error message when errorMessage contains an error.
@@ -217,14 +222,11 @@ fun EditNoteScreen(navController: NavHostController, note: Note) {
                 onClick = {
                     if (noteTitle.length < 3) {
                         errorMessage = "Title must be at least 3 characters"
-                    }
-                    else if (noteTitle.length > 50) {
+                    } else if (noteTitle.length > 50) {
                         errorMessage = "Title must be not contain more than 50 characters"
-                    }
-                    else if (noteContent.length > 120) {
+                    } else if (noteContent.length > 120) {
                         errorMessage = "Note must be not contain more than 120 characters"
-                    }
-                    else {
+                    } else {
                         // Update the note content
                         note.content = noteContent
                         note.title = noteTitle
@@ -238,7 +240,6 @@ fun EditNoteScreen(navController: NavHostController, note: Note) {
             ) {
                 Text("Save")
             }
-
 
 
         }
@@ -255,7 +256,6 @@ fun EditNoteScreen(navController: NavHostController, note: Note) {
 }
 
 
-
 @Composable
 fun ShowNoteScreen(navController: NavHostController, note: Note, onDelete: (Note) -> Unit) {
     val noteTitle by remember { mutableStateOf(note.title) } // State for note title
@@ -270,52 +270,54 @@ fun ShowNoteScreen(navController: NavHostController, note: Note, onDelete: (Note
                 .fillMaxWidth(),
             shape = MaterialTheme.shapes.medium // Rounded corners
         ) {
-        Column(
-            modifier = Modifier
-                .padding(top = 12.dp) // Padding from the top of the screen
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            // Display the note title
-            Text(
-                text = noteTitle,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 4.dp) // Space below title
-            )
-            // Display the note content
-            Text(
-                text = noteContent,
-                modifier = Modifier.padding(top = 4.dp)
-            )
-
-            Row(
-
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween // Distribute buttons evenly
+            Column(
+                modifier = Modifier
+                    .padding(top = 12.dp) // Padding from the top of the screen
+                    .fillMaxWidth()
+                    .padding(8.dp)
             ) {
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = {   // Delete button
-                    onDelete(note)
-                    navController.navigate("home")
-                },
-                    modifier = Modifier.padding(top = 16.dp)) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Delete note")
-                }
+                // Display the note title
+                Text(
+                    text = noteTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 4.dp) // Space below title
+                )
+                // Display the note content
+                Text(
+                    text = noteContent,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
 
-                Button(
-                    onClick = {
-                        //Update the note content
-                        note.content = noteContent
-                        note.title = noteTitle
-                        navController.navigate("editNote/${note.id}") // Navigates to edit screen based on the note ID
-                    },
-                    modifier = Modifier.padding(16.dp) // Padding for edit button
+                Row(
+
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween // Distribute buttons evenly
                 ) {
-                    Text("Edit")
-                }
-            }
+                    Spacer(modifier = Modifier.weight(1f))
+                    IconButton(
+                        onClick = {   // Delete button
+                            onDelete(note)
+                            navController.navigate("home")
+                        },
+                        modifier = Modifier.padding(top = 16.dp)
+                    ) {
+                        Icon(Icons.Filled.Delete, contentDescription = "Delete note")
+                    }
 
-        }
+                    Button(
+                        onClick = {
+                            //Update the note content
+                            note.content = noteContent
+                            note.title = noteTitle
+                            navController.navigate("editNote/${note.id}") // Navigates to edit screen based on the note ID
+                        },
+                        modifier = Modifier.padding(16.dp) // Padding for edit button
+                    ) {
+                        Text("Edit")
+                    }
+                }
+
+            }
         }
 
 
@@ -332,17 +334,15 @@ fun ShowNoteScreen(navController: NavHostController, note: Note, onDelete: (Note
 }
 
 
-
-
-
-
 @Composable
 fun AddNoteScreen(navController: NavHostController, notes: MutableList<Note>) {
     var noteContent by remember { mutableStateOf("") } // State for note content
     var noteTitle by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
-    Box(modifier = Modifier.fillMaxSize() .padding(top = 24.dp)) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .padding(top = 24.dp)) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Text field for inputting note title
             TextField(
@@ -356,7 +356,6 @@ fun AddNoteScreen(navController: NavHostController, notes: MutableList<Note>) {
             )
 
 
-
             // Text field for inputting note content
             TextField(
                 value = noteContent,
@@ -366,6 +365,7 @@ fun AddNoteScreen(navController: NavHostController, notes: MutableList<Note>) {
                 modifier = Modifier
                     .padding(16.dp)
                     .fillMaxWidth()
+                    .height(200.dp)
 
             )
 
@@ -397,7 +397,6 @@ fun AddNoteScreen(navController: NavHostController, notes: MutableList<Note>) {
             ) {
                 Text("Save")
             }
-
 
 
         }
