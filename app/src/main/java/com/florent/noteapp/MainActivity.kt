@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -14,22 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.florent.noteapp.ui.theme.NoteAppTheme
 import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.material3.Card
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -42,9 +32,12 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.navigation.compose.*
 import androidx.compose.ui.graphics.Color
+import androidx.navigation.compose.*
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 
 
@@ -105,51 +98,73 @@ fun NoteApp() {
 
 @Composable
 fun HomeScreen(navController: NavHostController, notes: List<Note>, onDelete: (Note) -> Unit) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(modifier = Modifier.padding(top = 64.dp)) {
-            items(notes) { note ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .clickable {
-                            // Navigate to the note detail screen with the selected note based on ID
-                            navController.navigate("showNote/${note.id}")
-                        }
-                ) {
+    Box(modifier = Modifier.fillMaxSize()) { // Use Box to allow for alignment
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Title at the top
+            Text(
+                text = "MY NOTES",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF6200EE),
 
-                    Row(
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 45.dp)
+                    .wrapContentHeight(Alignment.CenterVertically),
+                textAlign = TextAlign.Center
+            )
+
+            // LazyColumn to display notes
+            LazyColumn(
+                modifier = Modifier
+                    .padding(top = 8.dp) // Padding between title and LazyColumn
+                    .fillMaxWidth() // Fill available width
+            ) {
+                items(notes) { note ->
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                            .padding(8.dp)
+                            .clickable {
+                                // Navigate to the note detail screen with the selected note based on ID
+                                navController.navigate("showNote/${note.id}")
+                            }
                     ) {
-                        Column { // Wrap Text elements in a Column
-                            Text(
-                                text = note.title,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = note.content,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
-                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column { // Wrap Text elements in a Column
+                                Text(
+                                    text = note.title,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Text(
+                                    text = note.content,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
 
-                        IconButton(onClick = { onDelete(note) }) {
-                            Icon(Icons.Filled.Delete, contentDescription = "Delete note")
+                            IconButton(onClick = { onDelete(note) }) {
+                                Icon(Icons.Filled.Delete, contentDescription = "Delete note")
+                            }
                         }
                     }
                 }
-
             }
         }
 
+        // Floating Action Button at the bottom right
         FAB(
             modifier = Modifier
                 .padding(16.dp) // General padding
                 .offset(
-                    x = -12.dp,
-                    y = -45.dp
+                    x = (-12).dp,
+                    y = (-45).dp
                 ) // Offset to move the button up and to the right
                 .align(Alignment.BottomEnd),
             onClick = { navController.navigate("addNote") },
@@ -231,9 +246,9 @@ fun EditNoteScreen(navController: NavHostController, note: Note) {
         FAB(
             modifier = Modifier
                 .padding(16.dp) // General padding
-                .offset(x = 12.dp, y = -45.dp) // Offset to move the button up and to the right
+                .offset(x = 12.dp, y = (-45).dp) // Offset to move the button up and to the right
                 .align(Alignment.BottomStart),
-            onClick = { navController.navigate("showNote/${note.id}") },
+            onClick = { navController.navigate("showNote/${note.id}") }, // Takes user back to the note
             icon = Icons.Filled.ArrowBackIosNew
         )
     }
@@ -243,8 +258,8 @@ fun EditNoteScreen(navController: NavHostController, note: Note) {
 
 @Composable
 fun ShowNoteScreen(navController: NavHostController, note: Note, onDelete: (Note) -> Unit) {
-    var noteTitle by remember { mutableStateOf(note.title) } // State for note title
-    var noteContent by remember { mutableStateOf(note.content) } // State for note content
+    val noteTitle by remember { mutableStateOf(note.title) } // State for note title
+    val noteContent by remember { mutableStateOf(note.content) } // State for note content
 
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -279,7 +294,7 @@ fun ShowNoteScreen(navController: NavHostController, note: Note, onDelete: (Note
                 horizontalArrangement = Arrangement.SpaceBetween // Distribute buttons evenly
             ) {
                 Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = {
+                IconButton(onClick = {   // Delete button
                     onDelete(note)
                     navController.navigate("home")
                 },
@@ -308,7 +323,7 @@ fun ShowNoteScreen(navController: NavHostController, note: Note, onDelete: (Note
         FAB(
             modifier = Modifier
                 .padding(16.dp) // General padding
-                .offset(x = 12.dp, y = -45.dp) // Offset to move the button up and to the right
+                .offset(x = 12.dp, y = (-45).dp) // Offset to move the button up and to the right
                 .align(Alignment.BottomStart),
             onClick = { navController.navigate("home") },
             icon = Icons.Filled.ArrowBackIosNew
@@ -390,7 +405,7 @@ fun AddNoteScreen(navController: NavHostController, notes: MutableList<Note>) {
         FAB(
             modifier = Modifier
                 .padding(16.dp) // General padding
-                .offset(x = 12.dp, y = -45.dp) // Offset to move the button up and to the right
+                .offset(x = 12.dp, y = (-45).dp) // Offset to move the button up and to the right
                 .align(Alignment.BottomStart),
             onClick = { navController.navigate("home") },
             icon = Icons.Filled.ArrowBackIosNew
